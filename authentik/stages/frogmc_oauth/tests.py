@@ -397,6 +397,10 @@ class TestFrogMCOAuthStage(FlowTestCase):
             context={
                 PLAN_CONTEXT_FROGMC_OAUTH: True,
                 PLAN_CONTEXT_INVITATION: invitation_context,
+                PLAN_CONTEXT_PROMPT: {
+                    "email": "invited@example.test",
+                    "fixed_field": "invitation",
+                },
             },
         )
         token = FlowToken.objects.create(
@@ -428,6 +432,11 @@ class TestFrogMCOAuthStage(FlowTestCase):
         self.assertEqual(resumed_plan.flow_pk, self.flow.pk.hex)
         self.assertEqual(resumed_plan.bindings[0].stage, self.stage)
         self.assertEqual(resumed_plan.context[PLAN_CONTEXT_INVITATION], invitation_context)
+        resumed_prompt = resumed_plan.context[PLAN_CONTEXT_PROMPT]
+        self.assertEqual(resumed_prompt["email"], "invited@example.test")
+        self.assertEqual(resumed_prompt["fixed_field"], "invitation")
+        self.assertEqual(resumed_prompt["username"], "new-user")
+        self.assertEqual(resumed_prompt["path"], "goauthentik.io/sources/test-same-flow-source")
         self.assertIs(resumed_plan.context[PLAN_CONTEXT_IS_RESTORED], token)
         self.assertEqual(resumed_plan.bindings[-2].stage.view, PostSourceStage)
         self.assertFalse(FlowToken.objects.filter(pk=token.pk).exists())

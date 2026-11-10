@@ -487,6 +487,12 @@ class SourceFlowManager:
                 cleanup_frogmc_oauth_session(self.request)
                 return self.error_handler(ValueError("Flow token is invalid or expired"))
 
+            source_prompt = enroll_context[PLAN_CONTEXT_PROMPT]
+            original_prompt = plan.context.get(PLAN_CONTEXT_PROMPT, {})
+            merged_prompt = dict(source_prompt)
+            merged_prompt.update(original_prompt)
+            enroll_context[PLAN_CONTEXT_PROMPT] = merged_prompt
+
             return self._prepare_flow(
                 None,
                 connection,
