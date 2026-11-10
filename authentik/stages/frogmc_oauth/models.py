@@ -33,8 +33,7 @@ class FrogMCOAuthStage(Stage):
 
     @property
     def component(self) -> str:
-        # This stage is intended to be configured by API or Blueprint. There is no editor UI.
-        return ""
+        return "ak-stage-frogmc-oauth-form"
 
     class Meta:
         verbose_name = _("FrogMC OAuth Stage")
