@@ -64,6 +64,7 @@ export const AppEnum = {
     AuthentikStagesDeny: "authentik.stages.deny",
     AuthentikStagesDummy: "authentik.stages.dummy",
     AuthentikStagesEmail: "authentik.stages.email",
+    AuthentikStagesFrogmcOauth: "authentik.stages.frogmc_oauth",
     AuthentikStagesIdentification: "authentik.stages.identification",
     AuthentikStagesInvitation: "authentik.stages.invitation",
     AuthentikStagesPassword: "authentik.stages.password",

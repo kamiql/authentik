@@ -4904,6 +4904,46 @@
                     ],
                     "properties": {
                         "model": {
+                            "const": "authentik_stages_frogmc_oauth.frogmcoauthstage"
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string",
+                            "enum": [
+                                "absent",
+                                "created",
+                                "must_created",
+                                "present"
+                            ],
+                            "default": "present"
+                        },
+                        "conditions": {
+                            "type": "array",
+                            "items": {
+                                "type": "boolean"
+                            }
+                        },
+                        "permissions": {
+                            "$ref": "#/definitions/model_authentik_stages_frogmc_oauth.frogmcoauthstage_permissions"
+                        },
+                        "attrs": {
+                            "$ref": "#/definitions/model_authentik_stages_frogmc_oauth.frogmcoauthstage"
+                        },
+                        "identifiers": {
+                            "$ref": "#/definitions/model_authentik_stages_frogmc_oauth.frogmcoauthstage"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "required": [
+                        "model",
+                        "identifiers"
+                    ],
+                    "properties": {
+                        "model": {
                             "const": "authentik_stages_identification.identificationstage"
                         },
                         "id": {
@@ -9492,6 +9532,7 @@
                         "authentik.stages.deny",
                         "authentik.stages.dummy",
                         "authentik.stages.email",
+                        "authentik.stages.frogmc_oauth",
                         "authentik.stages.identification",
                         "authentik.stages.invitation",
                         "authentik.stages.password",
@@ -9630,6 +9671,7 @@
                         "authentik_stages_deny.denystage",
                         "authentik_stages_dummy.dummystage",
                         "authentik_stages_email.emailstage",
+                        "authentik_stages_frogmc_oauth.frogmcoauthstage",
                         "authentik_stages_identification.identificationstage",
                         "authentik_stages_invitation.invitationstage",
                         "authentik_stages_invitation.invitation",
@@ -15340,6 +15382,54 @@
                             "change_emailstage",
                             "delete_emailstage",
                             "view_emailstage"
+                        ]
+                    },
+                    "user": {
+                        "type": "integer"
+                    },
+                    "role": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model_authentik_stages_frogmc_oauth.frogmcoauthstage": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "title": "Name"
+                },
+                "source": {
+                    "type": "string",
+                    "format": "uuid",
+                    "title": "Source"
+                },
+                "resume_timeout": {
+                    "type": "string",
+                    "minLength": 1,
+                    "title": "Resume timeout",
+                    "description": "Time allowed for source authentication before the flow token expires."
+                }
+            },
+            "required": []
+        },
+        "model_authentik_stages_frogmc_oauth.frogmcoauthstage_permissions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "permission"
+                ],
+                "properties": {
+                    "permission": {
+                        "type": "string",
+                        "enum": [
+                            "add_frogmcoauthstage",
+                            "change_frogmcoauthstage",
+                            "delete_frogmcoauthstage",
+                            "view_frogmcoauthstage"
                         ]
                     },
                     "user": {

@@ -29,10 +29,10 @@ const sourceSource: SearchSelectSource<Source> = {
 export class FrogMCOAuthStageForm extends BaseStageForm<FrogMCOAuthStage> {
     protected endpoints = {
         load: (stageUuid: string) => aki(StagesApi).stagesFrogmcOauthRetrieve({ stageUuid }),
-        create: (frogmcOauthStageRequest: FrogMCOAuthStage) =>
-            aki(StagesApi).stagesFrogmcOauthCreate({ frogmcOauthStageRequest }),
-        update: (stageUuid: string, frogmcOauthStageRequest: FrogMCOAuthStage) =>
-            aki(StagesApi).stagesFrogmcOauthUpdate({ stageUuid, frogmcOauthStageRequest }),
+        create: (frogMCOAuthStageRequest: FrogMCOAuthStage) =>
+            aki(StagesApi).stagesFrogmcOauthCreate({ frogMCOAuthStageRequest }),
+        update: (stageUuid: string, frogMCOAuthStageRequest: FrogMCOAuthStage) =>
+            aki(StagesApi).stagesFrogmcOauthUpdate({ stageUuid, frogMCOAuthStageRequest }),
     };
 
     protected override renderForm(): TemplateResult {

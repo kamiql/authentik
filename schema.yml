@@ -32791,6 +32791,210 @@ paths:
           $ref: '#/components/responses/ValidationErrorResponse'
         '403':
           $ref: '#/components/responses/GenericErrorResponse'
+  /stages/frogmc_oauth/:
+    get:
+      operationId: stages_frogmc_oauth_list
+      description: Create and configure FrogMC OAuth stages.
+      parameters:
+      - $ref: '#/components/parameters/QueryName'
+      - $ref: '#/components/parameters/QueryPaginationOrdering'
+      - $ref: '#/components/parameters/QueryPaginationPage'
+      - $ref: '#/components/parameters/QueryPaginationPageSize'
+      - in: query
+        name: resume_timeout
+        schema:
+          type: string
+      - $ref: '#/components/parameters/QuerySearch'
+      - in: query
+        name: source
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - stages
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFrogMCOAuthStageList'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+    post:
+      operationId: stages_frogmc_oauth_create
+      description: Create and configure FrogMC OAuth stages.
+      tags:
+      - stages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FrogMCOAuthStageRequest'
+        required: true
+      security:
+      - authentik: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrogMCOAuthStage'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+  /stages/frogmc_oauth/{stage_uuid}/:
+    get:
+      operationId: stages_frogmc_oauth_retrieve
+      description: Create and configure FrogMC OAuth stages.
+      parameters:
+      - in: path
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FrogMC OAuth Stage.
+        required: true
+      tags:
+      - stages
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrogMCOAuthStage'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+    put:
+      operationId: stages_frogmc_oauth_update
+      description: Create and configure FrogMC OAuth stages.
+      parameters:
+      - in: path
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FrogMC OAuth Stage.
+        required: true
+      tags:
+      - stages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FrogMCOAuthStageRequest'
+        required: true
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrogMCOAuthStage'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+    patch:
+      operationId: stages_frogmc_oauth_partial_update
+      description: Create and configure FrogMC OAuth stages.
+      parameters:
+      - in: path
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FrogMC OAuth Stage.
+        required: true
+      tags:
+      - stages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFrogMCOAuthStageRequest'
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrogMCOAuthStage'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+    delete:
+      operationId: stages_frogmc_oauth_destroy
+      description: Create and configure FrogMC OAuth stages.
+      parameters:
+      - in: path
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FrogMC OAuth Stage.
+        required: true
+      tags:
+      - stages
+      security:
+      - authentik: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
+  /stages/frogmc_oauth/{stage_uuid}/used_by/:
+    get:
+      operationId: stages_frogmc_oauth_used_by_list
+      description: Get a list of all objects that use this object
+      parameters:
+      - in: path
+        name: stage_uuid
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FrogMC OAuth Stage.
+        required: true
+      tags:
+      - stages
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsedBy'
+          description: ''
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '403':
+          $ref: '#/components/responses/GenericErrorResponse'
   /stages/identification/:
     get:
       operationId: stages_identification_list
@@ -36568,6 +36772,7 @@ components:
       - authentik.stages.deny
       - authentik.stages.dummy
       - authentik.stages.email
+      - authentik.stages.frogmc_oauth
       - authentik.stages.identification
       - authentik.stages.invitation
       - authentik.stages.password
@@ -42253,6 +42458,72 @@ components:
           type: string
           minLength: 1
           default: xak-flow-frame
+    FrogMCOAuthStage:
+      type: object
+      description: Configure the source used by a FrogMC OAuth stage.
+      properties:
+        pk:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Stage uuid
+        name:
+          type: string
+        component:
+          type: string
+          description: Get object type so that we know how to edit the object
+          readOnly: true
+        verbose_name:
+          type: string
+          description: Return object's verbose_name
+          readOnly: true
+        verbose_name_plural:
+          type: string
+          description: Return object's plural verbose_name
+          readOnly: true
+        meta_model_name:
+          type: string
+          description: Return internal model name
+          readOnly: true
+        flow_set:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowSet'
+          readOnly: true
+        source:
+          type: string
+          format: uuid
+        resume_timeout:
+          type: string
+          description: Time allowed for source authentication before the flow token
+            expires.
+      required:
+      - component
+      - flow_set
+      - meta_model_name
+      - name
+      - pk
+      - source
+      - verbose_name
+      - verbose_name_plural
+    FrogMCOAuthStageRequest:
+      type: object
+      description: Configure the source used by a FrogMC OAuth stage.
+      properties:
+        name:
+          type: string
+          minLength: 1
+        source:
+          type: string
+          format: uuid
+        resume_timeout:
+          type: string
+          minLength: 1
+          description: Time allowed for source authentication before the flow token
+            expires.
+      required:
+      - name
+      - source
     GenericError:
       type: object
       description: Generic API Error
@@ -46149,6 +46420,7 @@ components:
       - authentik_stages_deny.denystage
       - authentik_stages_dummy.dummystage
       - authentik_stages_email.emailstage
+      - authentik_stages_frogmc_oauth.frogmcoauthstage
       - authentik_stages_identification.identificationstage
       - authentik_stages_invitation.invitationstage
       - authentik_stages_invitation.invitation
@@ -48484,6 +48756,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FlowStageBinding'
+        autocomplete:
+          $ref: '#/components/schemas/Autocomplete'
+      required:
+      - autocomplete
+      - pagination
+      - results
+    PaginatedFrogMCOAuthStageList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FrogMCOAuthStage'
         autocomplete:
           $ref: '#/components/schemas/Autocomplete'
       required:
@@ -51901,6 +52188,21 @@ components:
             to a challenge. RETRY returns the error message and a similar challenge
             to the executor. RESTART restarts the flow from the beginning, and RESTART_WITH_CONTEXT
             restarts the flow while keeping the current context.
+    PatchedFrogMCOAuthStageRequest:
+      type: object
+      description: Configure the source used by a FrogMC OAuth stage.
+      properties:
+        name:
+          type: string
+          minLength: 1
+        source:
+          type: string
+          format: uuid
+        resume_timeout:
+          type: string
+          minLength: 1
+          description: Time allowed for source authentication before the flow token
+            expires.
     PatchedGeoIPPolicyRequest:
       type: object
       description: GeoIP Policy Serializer

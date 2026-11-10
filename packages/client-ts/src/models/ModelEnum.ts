@@ -140,6 +140,7 @@ export const ModelEnum = {
     AuthentikStagesDenyDenystage: "authentik_stages_deny.denystage",
     AuthentikStagesDummyDummystage: "authentik_stages_dummy.dummystage",
     AuthentikStagesEmailEmailstage: "authentik_stages_email.emailstage",
+    AuthentikStagesFrogmcOauthFrogmcoauthstage: "authentik_stages_frogmc_oauth.frogmcoauthstage",
     AuthentikStagesIdentificationIdentificationstage:
         "authentik_stages_identification.identificationstage",
     AuthentikStagesInvitationInvitationstage: "authentik_stages_invitation.invitationstage",

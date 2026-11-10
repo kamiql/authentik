@@ -120,6 +120,11 @@ import {
     type EndpointStageRequest,
     EndpointStageRequestToJSON,
 } from "../models/EndpointStageRequest.js";
+import { type FrogMCOAuthStage, FrogMCOAuthStageFromJSON } from "../models/FrogMCOAuthStage.js";
+import {
+    type FrogMCOAuthStageRequest,
+    FrogMCOAuthStageRequestToJSON,
+} from "../models/FrogMCOAuthStageRequest.js";
 import { type GeoipBindingEnum } from "../models/GeoipBindingEnum.js";
 import {
     type IdentificationStage,
@@ -207,6 +212,10 @@ import {
     type PaginatedEndpointStageList,
     PaginatedEndpointStageListFromJSON,
 } from "../models/PaginatedEndpointStageList.js";
+import {
+    type PaginatedFrogMCOAuthStageList,
+    PaginatedFrogMCOAuthStageListFromJSON,
+} from "../models/PaginatedFrogMCOAuthStageList.js";
 import {
     type PaginatedIdentificationStageList,
     PaginatedIdentificationStageListFromJSON,
@@ -332,6 +341,10 @@ import {
     type PatchedEndpointStageRequest,
     PatchedEndpointStageRequestToJSON,
 } from "../models/PatchedEndpointStageRequest.js";
+import {
+    type PatchedFrogMCOAuthStageRequest,
+    PatchedFrogMCOAuthStageRequestToJSON,
+} from "../models/PatchedFrogMCOAuthStageRequest.js";
 import {
     type PatchedIdentificationStageRequest,
     PatchedIdentificationStageRequestToJSON,
@@ -1509,6 +1522,70 @@ export interface StagesEndpointsUpdateRequest {
 export interface StagesEndpointsUsedByListRequest {
     /**
      * A UUID string identifying this Endpoint Stage.
+     */
+    stageUuid: string;
+}
+
+export interface StagesFrogmcOauthCreateRequest {
+    frogMCOAuthStageRequest: FrogMCOAuthStageRequest;
+}
+
+export interface StagesFrogmcOauthDestroyRequest {
+    /**
+     * A UUID string identifying this FrogMC OAuth Stage.
+     */
+    stageUuid: string;
+}
+
+export interface StagesFrogmcOauthListRequest {
+    name?: string;
+    /**
+     * Which field to use when ordering the results.
+     */
+    ordering?: string;
+    /**
+     * A page number within the paginated result set.
+     */
+    page?: number;
+    /**
+     * Number of results to return per page.
+     */
+    pageSize?: number;
+    resumeTimeout?: string;
+    /**
+     * A search term.
+     */
+    search?: string;
+    source?: string;
+    stageUuid?: string;
+}
+
+export interface StagesFrogmcOauthPartialUpdateRequest {
+    /**
+     * A UUID string identifying this FrogMC OAuth Stage.
+     */
+    stageUuid: string;
+    patchedFrogMCOAuthStageRequest?: PatchedFrogMCOAuthStageRequest;
+}
+
+export interface StagesFrogmcOauthRetrieveRequest {
+    /**
+     * A UUID string identifying this FrogMC OAuth Stage.
+     */
+    stageUuid: string;
+}
+
+export interface StagesFrogmcOauthUpdateRequest {
+    /**
+     * A UUID string identifying this FrogMC OAuth Stage.
+     */
+    stageUuid: string;
+    frogMCOAuthStageRequest: FrogMCOAuthStageRequest;
+}
+
+export interface StagesFrogmcOauthUsedByListRequest {
+    /**
+     * A UUID string identifying this FrogMC OAuth Stage.
      */
     stageUuid: string;
 }
@@ -10878,6 +10955,505 @@ export class StagesApi extends runtime.BaseAPI {
         initOverrides?: RequestInit | runtime.InitOverrideFunction,
     ): Promise<Array<UsedBy>> {
         const response = await this.stagesEndpointsUsedByListRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthCreate without sending the request
+     */
+    async stagesFrogmcOauthCreateRequestOpts(
+        requestParameters: StagesFrogmcOauthCreateRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["frogMCOAuthStageRequest"] == null) {
+            throw new runtime.RequiredError(
+                "frogMCOAuthStageRequest",
+                'Required parameter "frogMCOAuthStageRequest" was null or undefined when calling stagesFrogmcOauthCreate().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters["Content-Type"] = "application/json";
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        const urlPath = `/stages/frogmc_oauth/`;
+
+        return {
+            path: urlPath,
+            method: "POST",
+            headers: headerParameters,
+            query: queryParameters,
+            body: FrogMCOAuthStageRequestToJSON(requestParameters["frogMCOAuthStageRequest"]),
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthCreateRaw(
+        requestParameters: StagesFrogmcOauthCreateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<FrogMCOAuthStage>> {
+        const requestOptions = await this.stagesFrogmcOauthCreateRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) =>
+            FrogMCOAuthStageFromJSON(jsonValue),
+        );
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthCreate(
+        requestParameters: StagesFrogmcOauthCreateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<FrogMCOAuthStage> {
+        const response = await this.stagesFrogmcOauthCreateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthDestroy without sending the request
+     */
+    async stagesFrogmcOauthDestroyRequestOpts(
+        requestParameters: StagesFrogmcOauthDestroyRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["stageUuid"] == null) {
+            throw new runtime.RequiredError(
+                "stageUuid",
+                'Required parameter "stageUuid" was null or undefined when calling stagesFrogmcOauthDestroy().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stages/frogmc_oauth/{stage_uuid}/`;
+        urlPath = urlPath.replace(
+            "{stage_uuid}",
+            encodeURIComponent(String(requestParameters["stageUuid"])),
+        );
+
+        return {
+            path: urlPath,
+            method: "DELETE",
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthDestroyRaw(
+        requestParameters: StagesFrogmcOauthDestroyRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<void>> {
+        const requestOptions = await this.stagesFrogmcOauthDestroyRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthDestroy(
+        requestParameters: StagesFrogmcOauthDestroyRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<void> {
+        await this.stagesFrogmcOauthDestroyRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthList without sending the request
+     */
+    async stagesFrogmcOauthListRequestOpts(
+        requestParameters: StagesFrogmcOauthListRequest,
+    ): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        if (requestParameters["name"] != null) {
+            queryParameters["name"] = requestParameters["name"];
+        }
+
+        if (requestParameters["ordering"] != null) {
+            queryParameters["ordering"] = requestParameters["ordering"];
+        }
+
+        if (requestParameters["page"] != null) {
+            queryParameters["page"] = requestParameters["page"];
+        }
+
+        if (requestParameters["pageSize"] != null) {
+            queryParameters["page_size"] = requestParameters["pageSize"];
+        }
+
+        if (requestParameters["resumeTimeout"] != null) {
+            queryParameters["resume_timeout"] = requestParameters["resumeTimeout"];
+        }
+
+        if (requestParameters["search"] != null) {
+            queryParameters["search"] = requestParameters["search"];
+        }
+
+        if (requestParameters["source"] != null) {
+            queryParameters["source"] = requestParameters["source"];
+        }
+
+        if (requestParameters["stageUuid"] != null) {
+            queryParameters["stage_uuid"] = requestParameters["stageUuid"];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        const urlPath = `/stages/frogmc_oauth/`;
+
+        return {
+            path: urlPath,
+            method: "GET",
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthListRaw(
+        requestParameters: StagesFrogmcOauthListRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<PaginatedFrogMCOAuthStageList>> {
+        const requestOptions = await this.stagesFrogmcOauthListRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) =>
+            PaginatedFrogMCOAuthStageListFromJSON(jsonValue),
+        );
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthList(
+        requestParameters: StagesFrogmcOauthListRequest = {},
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<PaginatedFrogMCOAuthStageList> {
+        const response = await this.stagesFrogmcOauthListRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthPartialUpdate without sending the request
+     */
+    async stagesFrogmcOauthPartialUpdateRequestOpts(
+        requestParameters: StagesFrogmcOauthPartialUpdateRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["stageUuid"] == null) {
+            throw new runtime.RequiredError(
+                "stageUuid",
+                'Required parameter "stageUuid" was null or undefined when calling stagesFrogmcOauthPartialUpdate().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters["Content-Type"] = "application/json";
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stages/frogmc_oauth/{stage_uuid}/`;
+        urlPath = urlPath.replace(
+            "{stage_uuid}",
+            encodeURIComponent(String(requestParameters["stageUuid"])),
+        );
+
+        return {
+            path: urlPath,
+            method: "PATCH",
+            headers: headerParameters,
+            query: queryParameters,
+            body: PatchedFrogMCOAuthStageRequestToJSON(
+                requestParameters["patchedFrogMCOAuthStageRequest"],
+            ),
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthPartialUpdateRaw(
+        requestParameters: StagesFrogmcOauthPartialUpdateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<FrogMCOAuthStage>> {
+        const requestOptions =
+            await this.stagesFrogmcOauthPartialUpdateRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) =>
+            FrogMCOAuthStageFromJSON(jsonValue),
+        );
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthPartialUpdate(
+        requestParameters: StagesFrogmcOauthPartialUpdateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<FrogMCOAuthStage> {
+        const response = await this.stagesFrogmcOauthPartialUpdateRaw(
+            requestParameters,
+            initOverrides,
+        );
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthRetrieve without sending the request
+     */
+    async stagesFrogmcOauthRetrieveRequestOpts(
+        requestParameters: StagesFrogmcOauthRetrieveRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["stageUuid"] == null) {
+            throw new runtime.RequiredError(
+                "stageUuid",
+                'Required parameter "stageUuid" was null or undefined when calling stagesFrogmcOauthRetrieve().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stages/frogmc_oauth/{stage_uuid}/`;
+        urlPath = urlPath.replace(
+            "{stage_uuid}",
+            encodeURIComponent(String(requestParameters["stageUuid"])),
+        );
+
+        return {
+            path: urlPath,
+            method: "GET",
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthRetrieveRaw(
+        requestParameters: StagesFrogmcOauthRetrieveRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<FrogMCOAuthStage>> {
+        const requestOptions = await this.stagesFrogmcOauthRetrieveRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) =>
+            FrogMCOAuthStageFromJSON(jsonValue),
+        );
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthRetrieve(
+        requestParameters: StagesFrogmcOauthRetrieveRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<FrogMCOAuthStage> {
+        const response = await this.stagesFrogmcOauthRetrieveRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthUpdate without sending the request
+     */
+    async stagesFrogmcOauthUpdateRequestOpts(
+        requestParameters: StagesFrogmcOauthUpdateRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["stageUuid"] == null) {
+            throw new runtime.RequiredError(
+                "stageUuid",
+                'Required parameter "stageUuid" was null or undefined when calling stagesFrogmcOauthUpdate().',
+            );
+        }
+
+        if (requestParameters["frogMCOAuthStageRequest"] == null) {
+            throw new runtime.RequiredError(
+                "frogMCOAuthStageRequest",
+                'Required parameter "frogMCOAuthStageRequest" was null or undefined when calling stagesFrogmcOauthUpdate().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters["Content-Type"] = "application/json";
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stages/frogmc_oauth/{stage_uuid}/`;
+        urlPath = urlPath.replace(
+            "{stage_uuid}",
+            encodeURIComponent(String(requestParameters["stageUuid"])),
+        );
+
+        return {
+            path: urlPath,
+            method: "PUT",
+            headers: headerParameters,
+            query: queryParameters,
+            body: FrogMCOAuthStageRequestToJSON(requestParameters["frogMCOAuthStageRequest"]),
+        };
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthUpdateRaw(
+        requestParameters: StagesFrogmcOauthUpdateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<FrogMCOAuthStage>> {
+        const requestOptions = await this.stagesFrogmcOauthUpdateRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) =>
+            FrogMCOAuthStageFromJSON(jsonValue),
+        );
+    }
+
+    /**
+     * Create and configure FrogMC OAuth stages.
+     */
+    async stagesFrogmcOauthUpdate(
+        requestParameters: StagesFrogmcOauthUpdateRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<FrogMCOAuthStage> {
+        const response = await this.stagesFrogmcOauthUpdateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for stagesFrogmcOauthUsedByList without sending the request
+     */
+    async stagesFrogmcOauthUsedByListRequestOpts(
+        requestParameters: StagesFrogmcOauthUsedByListRequest,
+    ): Promise<runtime.RequestOpts> {
+        if (requestParameters["stageUuid"] == null) {
+            throw new runtime.RequiredError(
+                "stageUuid",
+                'Required parameter "stageUuid" was null or undefined when calling stagesFrogmcOauthUsedByList().',
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("authentik", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stages/frogmc_oauth/{stage_uuid}/used_by/`;
+        urlPath = urlPath.replace(
+            "{stage_uuid}",
+            encodeURIComponent(String(requestParameters["stageUuid"])),
+        );
+
+        return {
+            path: urlPath,
+            method: "GET",
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Get a list of all objects that use this object
+     */
+    async stagesFrogmcOauthUsedByListRaw(
+        requestParameters: StagesFrogmcOauthUsedByListRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<runtime.ApiResponse<Array<UsedBy>>> {
+        const requestOptions = await this.stagesFrogmcOauthUsedByListRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(UsedByFromJSON));
+    }
+
+    /**
+     * Get a list of all objects that use this object
+     */
+    async stagesFrogmcOauthUsedByList(
+        requestParameters: StagesFrogmcOauthUsedByListRequest,
+        initOverrides?: RequestInit | runtime.InitOverrideFunction,
+    ): Promise<Array<UsedBy>> {
+        const response = await this.stagesFrogmcOauthUsedByListRaw(
+            requestParameters,
+            initOverrides,
+        );
         return await response.value();
     }
 
