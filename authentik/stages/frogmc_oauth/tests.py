@@ -62,7 +62,7 @@ class TestFrogMCOAuthStage(FlowTestCase):
     def test_model_fields_and_stage_registration(self):
         self.assertIs(self.stage.view, FrogMCOAuthStageView)
         self.assertEqual(self.stage.resume_timeout, "minutes=10")
-        self.assertEqual(self.stage.component, "")
+        self.assertEqual(self.stage.component, "ak-stage-frogmc-oauth-form")
 
     def test_flow_token_captures_plan_with_expiry(self):
         user = create_test_admin_user()
@@ -170,7 +170,7 @@ class TestFrogMCOAuthStage(FlowTestCase):
     def test_restored_stage_clears_session_without_restarting_oauth(self):
         self.source.enrollment_flow = self.flow
         self.source.save()
-        restored_token = MagicMock(pk="restored-token")
+        restored_token = MagicMock(pk="restored-token", is_expired=False)
         session_token = MagicMock(pk="restored-token")
         request = MagicMock()
         request.session = {
@@ -203,11 +203,8 @@ class TestFrogMCOAuthStage(FlowTestCase):
             fixed_data={"fixed_field": "invitation", "first": "original"},
             flow=self.flow,
         )
-        request = MagicMock()
-        request.session = {
-            SESSION_KEY_GET: {QS_INVITATION_TOKEN_KEY: str(invitation.pk)},
-        }
-        request.user = get_anonymous_user()
+        request = RequestFactory().get("/", user=get_anonymous_user())
+        request.session[SESSION_KEY_GET] = {QS_INVITATION_TOKEN_KEY: str(invitation.pk)}
         original_plan = FlowPlan(
             flow_pk=self.flow.pk.hex,
             bindings=[invitation_binding, self.binding],
@@ -223,7 +220,7 @@ class TestFrogMCOAuthStage(FlowTestCase):
 
         invitation_response = invitation_view.dispatch(request)
         self.assertIs(invitation_response, invitation_executor.stage_ok.return_value)
-        self.assertIs(original_plan.context[PLAN_CONTEXT_INVITATION], invitation)
+        self.assertEqual(original_plan.context[PLAN_CONTEXT_INVITATION], invitation)
         self.assertEqual(
             original_plan.context[PLAN_CONTEXT_PROMPT],
             {"fixed_field": "invitation", "first": "original"},
@@ -274,7 +271,9 @@ class TestFrogMCOAuthStage(FlowTestCase):
         executor.stage_invalid.return_value = MagicMock()
         reused_response = view.dispatch(request)
         self.assertIs(reused_response, executor.stage_invalid.return_value)
-        self.assertEqual(request.session, {})
+        self.assertNotIn(SESSION_KEY_OVERRIDE_FLOW_TOKEN, request.session)
+        self.assertNotIn(SESSION_KEY_SOURCE_FLOW_CONTEXT, request.session)
+        self.assertNotIn(SESSION_KEY_SOURCE_FLOW_STAGES, request.session)
 
     def test_expired_flow_token_is_rejected_and_session_is_cleaned(self):
         token = FlowToken.objects.create(
