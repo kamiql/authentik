@@ -1,4 +1,5 @@
 import "#admin/admin-overview/AdminOverviewPage";
+import "#admin/stages/frogmc_oauth/FrogMCOAuthStageForm";
 import "#common/sentry/apply";
 import "#elements/messages/MessageContainer";
 import "#admin/ak-interface-admin";
