@@ -111,6 +111,9 @@ class OAuthCallback(OAuthClientMixin, View):
 
     def handle_login_failure(self, reason: str) -> HttpResponse:
         "Message user and redirect on error."
+        from authentik.stages.frogmc_oauth.session import cleanup_frogmc_oauth_session
+
+        cleanup_frogmc_oauth_session(self.request)
         LOGGER.warning("Authentication Failure", reason=reason)
         messages.error(
             self.request,

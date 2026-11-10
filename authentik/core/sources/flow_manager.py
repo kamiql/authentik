@@ -214,6 +214,7 @@ class SourceFlowManager:
             action, connection = self.get_action(**kwargs)
         except IntegrityError as exc:
             self._logger.warning("failed to get action", exc=exc)
+            self._cleanup_frogmc_oauth_session()
             return redirect(reverse("authentik_core:root-redirect"))
         self._logger.debug("get_action", action=action, connection=connection)
         try:
@@ -239,6 +240,7 @@ class SourceFlowManager:
                     return response
         except FlowNonApplicableException as exc:
             self._logger.warning("Flow non applicable", exc=exc)
+            self._cleanup_frogmc_oauth_session()
             return self.error_handler(exc)
         # Default case, assume deny
         error = Exception(
@@ -247,7 +249,14 @@ class SourceFlowManager:
                 "with the source you've previously signed up with."
             ).format(source=self.source.name),
         )
+        self._cleanup_frogmc_oauth_session()
         return self.error_handler(error)
+
+    def _cleanup_frogmc_oauth_session(self) -> None:
+        """Clean only a pending FrogMC OAuth resume token on source failure."""
+        from authentik.stages.frogmc_oauth.session import cleanup_frogmc_oauth_session
+
+        cleanup_frogmc_oauth_session(self.request)
 
     def handle_match_failure(self, failure: MatchFailure) -> HttpResponse | None:
         """Resume an opted-in Source Stage after a configured matching failure."""
