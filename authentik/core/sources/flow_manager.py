@@ -446,21 +446,59 @@ class SourceFlowManager:
                 self.request,
                 _("Source is not configured for enrollment."),
             )
+
+        flow = self.source.enrollment_flow
+        source_stages = [
+            in_memory_stage(
+                MessageStage,
+                message=_("Successfully authenticated with {source}!").format(
+                    source=self.source.name
+                ),
+            )
+        ]
+        enroll_context = {
+            PLAN_CONTEXT_PROMPT: delete_none_values(self.user_properties),
+            PLAN_CONTEXT_USER_PATH: self.source.get_user_path(),
+        }
+
+        # When a FrogMC OAuth stage is bound inside the same flow that the source
+        # uses for enrollment, planning that enrollment flow again would restart it
+        # at its first stage (commonly InvitationStage). Continue the already
+        # validated plan instead; its UserWrite and remaining enrollment stages
+        # will create the user before PostSourceStage links the OAuth connection.
+        token = self.request.session.get(SESSION_KEY_OVERRIDE_FLOW_TOKEN)
+        if (
+            isinstance(token, FlowToken)
+            and token.identifier.startswith("frogmc-oauth-")
+            and token.flow_id == flow.pk
+        ):
+            from authentik.stages.frogmc_oauth.session import (
+                PLAN_CONTEXT_FROGMC_OAUTH,
+                cleanup_frogmc_oauth_session,
+            )
+
+            try:
+                token.refresh_from_db()
+                plan = token.plan
+            except (FlowToken.DoesNotExist, AttributeError, EOFError, ImportError, IndexError):
+                cleanup_frogmc_oauth_session(self.request)
+                return self.error_handler(ValueError("Flow token is invalid or expired"))
+            if token.is_expired or not plan.context.get(PLAN_CONTEXT_FROGMC_OAUTH):
+                cleanup_frogmc_oauth_session(self.request)
+                return self.error_handler(ValueError("Flow token is invalid or expired"))
+
+            return self._prepare_flow(
+                None,
+                connection,
+                stages=source_stages,
+                **enroll_context,
+            )
+
         return self._prepare_flow(
-            self.source.enrollment_flow,
+            flow,
             connection,
-            stages=[
-                in_memory_stage(
-                    MessageStage,
-                    message=_("Successfully authenticated with {source}!").format(
-                        source=self.source.name
-                    ),
-                )
-            ],
-            **{
-                PLAN_CONTEXT_PROMPT: delete_none_values(self.user_properties),
-                PLAN_CONTEXT_USER_PATH: self.source.get_user_path(),
-            },
+            stages=source_stages,
+            **enroll_context,
         )
 
 

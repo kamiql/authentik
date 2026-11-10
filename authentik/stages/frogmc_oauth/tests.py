@@ -12,6 +12,7 @@ from authentik.core.sources.flow_manager import (
     SESSION_KEY_SOURCE_FLOW_CONTEXT,
     SESSION_KEY_SOURCE_FLOW_STAGES,
 )
+from authentik.core.sources.stage import PostSourceStage
 from authentik.core.tests.utils import RequestFactory, create_test_admin_user, create_test_flow
 from authentik.flows.markers import StageMarker
 from authentik.flows.models import FlowDesignation, FlowStageBinding, FlowToken, in_memory_stage
@@ -25,7 +26,10 @@ from authentik.flows.planner import (
 from authentik.flows.tests import FlowTestCase
 from authentik.flows.views.executor import SESSION_KEY_GET, SESSION_KEY_PLAN
 from authentik.stages.frogmc_oauth.models import FrogMCOAuthStage
-from authentik.stages.frogmc_oauth.session import cleanup_frogmc_oauth_session
+from authentik.stages.frogmc_oauth.session import (
+    PLAN_CONTEXT_FROGMC_OAUTH,
+    cleanup_frogmc_oauth_session,
+)
 from authentik.stages.frogmc_oauth.stage import (
     FrogMCOAuthResumeStage,
     FrogMCOAuthStageView,
@@ -383,3 +387,48 @@ class TestFrogMCOAuthStage(FlowTestCase):
         self.assertEqual(source_plan.flow_pk, source_flow.pk.hex)
         self.assertEqual(source_plan.bindings[-1].stage.view, FrogMCOAuthResumeStage)
         self.assertEqual(source_plan.context[PLAN_CONTEXT_IS_REDIRECTED], self.flow)
+
+    def test_source_enrollment_flow_same_as_original_resumes_saved_plan(self):
+        """Do not restart an invitation enrollment flow after OAuth enrollment."""
+        invitation_context = {"validated_invitation": "invite-id"}
+        original_plan = FlowPlan(
+            flow_pk=self.flow.pk.hex,
+            bindings=[self.binding],
+            markers=[StageMarker()],
+            context={
+                PLAN_CONTEXT_FROGMC_OAUTH: True,
+                PLAN_CONTEXT_INVITATION: invitation_context,
+            },
+        )
+        token = FlowToken.objects.create(
+            user=get_anonymous_user(),
+            identifier="frogmc-oauth-same-enrollment-flow",
+            flow=self.flow,
+            expires=now() + timedelta(minutes=10),
+            _plan=FlowToken.pickle(original_plan),
+        )
+        source = OAuthSource.objects.create(
+            name="test-same-flow-source",
+            slug="test-same-flow-source",
+            enrollment_flow=self.flow,
+        )
+        request = RequestFactory().get("/")
+        request.session[SESSION_KEY_OVERRIDE_FLOW_TOKEN] = token
+        manager = OAuthSourceFlowManager(
+            source,
+            request,
+            "new-user",
+            {"info": {"username": "new-user", "email": "user@example.test"}},
+            {},
+        )
+
+        response = manager.get_flow()
+
+        self.assertEqual(response.status_code, 302)
+        resumed_plan = request.session[SESSION_KEY_PLAN]
+        self.assertEqual(resumed_plan.flow_pk, self.flow.pk.hex)
+        self.assertEqual(resumed_plan.bindings[0].stage, self.stage)
+        self.assertEqual(resumed_plan.context[PLAN_CONTEXT_INVITATION], invitation_context)
+        self.assertIs(resumed_plan.context[PLAN_CONTEXT_IS_RESTORED], token)
+        self.assertEqual(resumed_plan.bindings[-2].stage.view, PostSourceStage)
+        self.assertFalse(FlowToken.objects.filter(pk=token.pk).exists())

@@ -79,14 +79,14 @@ class TestTypeOpenID(TestCase):
         self.assertEqual(mock.last_request.headers["Authorization"], f"foo {token}")
 
     @Mocker()
-    def test_userinfo_jwt(self, mock: Mocker):
-        """Test id_token fallback when profile_url is empty"""
+    def test_userinfo_jwt_after_profile_request_fails(self, mock: Mocker):
+        """Test id_token fallback when the access token cannot fetch userinfo."""
         jwks_cert = create_test_cert()
         client_id = generate_id()
-        self.source.profile_url = ""
         self.source.consumer_key = client_id
         self.source.oidc_jwks = {"keys": [JWKSView.get_jwk_for_key(jwks_cert, "sig")]}
         self.source.save()
+        mock.get("http://localhost/userinfo", status_code=401)
         token = generate_id()
         now = int(time.time())
         id_token_payload = {
